@@ -17,12 +17,12 @@ class Elementor_Blocksy_Posts_Widget extends Widget_Base
 
     public function get_title()
     {
-        return __('Custom Shortcode', 'beyondweb');
+        return __('Blocksy Posts', 'beyondweb');
     }
 
     public function get_icon()
     {
-        return 'eicon-code';
+        return 'eicon-post-list';
     }
 
     public function get_categories()
