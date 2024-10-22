@@ -99,6 +99,48 @@ class Elementor_Blocksy_Posts_Widget extends Widget_Base
             ]
         );
 
+        $this->add_control(
+            'bento_grid',
+            [
+                'label' => esc_html__('Bento Grid Layout', 'beyondweb'),
+                'type' => Controls_Manager::SWITCHER,
+                'label_on' => esc_html__('Yes', 'beyondweb'),
+                'label_off' => esc_html__('No', 'beyondweb'),
+                'return_value' => 'yes',
+                'default' => 'No',
+            ]
+        );
+
+        $this->add_control(
+            'bento_grid_layout',
+            [
+                'label' => esc_html__('Alignment', 'beyondweb'),
+                'type' => Controls_Manager::CHOOSE,
+                'options' => [
+                    'left' => [
+                        'title' => esc_html__('Left', 'beyondweb'),
+                        'icon' => 'eicon-h-align-left',
+                    ],
+                    'center' => [
+                        'title' => esc_html__('Center', 'beyondweb'),
+                        'icon' => 'eicon-h-align-center',
+                    ],
+                    'right' => [
+                        'title' => esc_html__('Right', 'beyondweb'),
+                        'icon' => 'eicon-h-align-right',
+                    ],
+                ],
+                'default' => 'left',
+                'toggle' => true,
+//				'selectors' => [
+//					'{{WRAPPER}} .your-class' => 'text-align: {{VALUE}};',
+//				],
+                'condition' => [
+                    'bento_grid' => 'yes',
+                ],
+            ]
+        );
+
         // Include Taxonomy Filter
         $this->add_control(
             'taxonomy_include',
@@ -305,12 +347,113 @@ class Elementor_Blocksy_Posts_Widget extends Widget_Base
                 // Append post IDs to the shortcode, assuming it has an 'ids' attribute.
                 $limit = $settings['posts_per_page'];
             }
-            $shortcode = '[blocksy_posts post_ids="' . $ids . '" limit="' . $limit . '" post_type="' . $settings['post_type'] . '" has_pagination="no" filtering="yes"]';
+
+            $class = '';
+            $bento_cols = '';
+            $bento_col_class = '';
+            if (!empty($settings['bento_grid']) && $settings['bento_grid'] == 'yes') {
+                $class = 'bento_grid';
+                $bento_cols = (int)(($settings['posts_per_page'] - 1) / 2 + 1);
+                if ($bento_cols > 3) {
+                    $bento_cols = 3;
+                }
+                if ($bento_cols < 2) {
+                    $bento_cols = 2;
+                }
+                $bento_col_class = 'bento-col-' . $bento_cols;
+                $class .= ' ' . $bento_col_class;
+            }
+
+            if (!empty($settings['bento_grid_layout'])) {
+                $class .= ' ' . $settings['bento_grid_layout'];
+            }
+
+            $shortcode = '[blocksy_posts post_ids="' . $ids . '" limit="' . $limit . '" post_type="' . $settings['post_type'] . '" has_pagination="no" filtering="yes" class="' . $class . '" ]';
             error_log('shortcode-->' . print_r($shortcode, true));
             $settings['shortcode'] = $shortcode;
 
+
             // Render the shortcode with post IDs.
             echo do_shortcode($shortcode);
+            ?>
+            <style>
+                .bento_grid.left.bento-col-3 .entries {
+                    grid-template-columns: repeat(4, 1fr) !important;
+                    grid-template-areas:
+                        "hero hero  aside1 aside3"
+                        "hero hero  aside2 aside4";
+                }
+
+                .bento_grid.center.bento-col-3 .entries {
+                    grid-template-columns: repeat(4, 1fr) !important;
+                    grid-template-areas:
+                        "aside1 hero hero aside3"
+                        "aside2 hero hero aside4";
+                }
+
+                .bento_grid.right.bento-col-3 .entries {
+                    grid-template-columns: repeat(4, 1fr) !important;
+                    grid-template-areas:
+                        "aside1 aside3 hero hero"
+                        "aside2 aside4 hero hero";
+                }
+
+                .bento_grid.left.bento-col-2 .entries {
+                    grid-template-columns: repeat(3, 1fr) !important;
+                    grid-template-areas:
+                        "hero hero  aside1"
+                        "hero hero  aside2";
+                }
+
+                .bento_grid.center.bento-col-2 .entries {
+                    grid-template-columns: repeat(3, 1fr) !important;
+                    grid-template-areas:
+                        "aside1 hero hero"
+                        "aside2 hero hero";
+                }
+
+                .bento_grid.right.bento-col-2 .entries {
+                    grid-template-columns: repeat(3, 1fr) !important;
+                    grid-template-areas:
+                        "aside1 hero hero"
+                        "aside2 hero hero";
+                }
+
+                .bento_grid .entries .entry-card:nth-child(1) {
+                    grid-area: hero;
+                }
+
+                .bento_grid .entries .entry-card:nth-child(1) .entry-title {
+                    font-size: 2em;
+                }
+
+                .bento_grid .entries .entry-card:nth-child(1) .ct-ghost {
+                    flex: 0;
+                }
+
+                .bento_grid .entries .entry-card:nth-child(2) {
+                    grid-area: aside1;
+                }
+
+                .bento_grid .entries .entry-card:nth-child(3) {
+                    grid-area: aside2;
+                }
+
+                .bento_grid .entries .entry-card:nth-child(4) {
+                    grid-area: aside3;
+                }
+
+                .bento_grid .entries .entry-card:nth-child(5) {
+                    grid-area: aside4;
+                }
+
+                .bento_grid .entries .entry-card {
+                    padding-bottom: 0;
+                }
+            </style>
+            <?php
+
+
         } else {
             echo __('No posts found.', 'beyondweb');
         }
