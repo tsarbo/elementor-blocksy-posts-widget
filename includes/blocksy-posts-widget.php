@@ -377,6 +377,12 @@ class Elementor_Blocksy_Posts_Widget extends Widget_Base
             echo do_shortcode($shortcode);
             ?>
             <style>
+
+                .bento_grid .entries:not([data-cards=cover]) :is(.entry-button,.entry-meta,
+                .bento_grid .ct-media-container):last-child:not(:only-child) {
+                    margin-top: 0;
+                }
+
                 .bento_grid.left.bento-col-3 .entries {
                     grid-template-columns: repeat(4, 1fr) !important;
                     grid-template-areas:
@@ -412,12 +418,90 @@ class Elementor_Blocksy_Posts_Widget extends Widget_Base
                         "aside2 hero hero";
                 }
 
+
                 .bento_grid.right.bento-col-2 .entries {
                     grid-template-columns: repeat(3, 1fr) !important;
                     grid-template-areas:
                         "aside1 hero hero"
                         "aside2 hero hero";
                 }
+
+                @media screen and (min-width: 521px) and (max-width: 1200px) {
+                    .bento_grid.left.bento-col-3 .entries,
+                    .bento_grid.center.bento-col-3 .entries,
+                    .bento_grid.right.bento-col-3 .entries {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        grid-template-areas:
+                        "hero hero"
+                        "aside1 aside2"
+                        "aside3 aside4";
+                    }
+
+
+                    .bento_grid.center.bento-col-2 .entries {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        grid-template-areas:
+                            "hero hero"
+                            "aside1 aside2";
+                    }
+
+                    .bento_grid.right.bento-col-2 .entries {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        grid-template-areas:
+                            "hero hero"
+                            "aside1 aside2";
+                    }
+
+
+                }
+
+                @media screen and (max-width: 520px) {
+                    .bento_grid.left.bento-col-3 .entries,
+                    .bento_grid.center.bento-col-3 .entries,
+                    .bento_grid.right.bento-col-3 .entries,
+                    .bento_grid.center.bento-col-2 .entries,
+                    .bento_grid.right.bento-col-2 .entries {
+                        grid-template-columns: repeat(1, 1fr) !important;
+                        grid-template-areas:
+                        "hero"
+                        "aside1"
+                        "aside2"
+                        "aside3"
+                        "aside4";
+                    }
+
+                    /*.bento_grid.center.bento-col-2 .entries,*/
+                    /*.bento_grid.left.bento-col-2 .entries {*/
+                    /*    grid-template-columns: repeat(2, 1fr) !important;*/
+                    /*    grid-template-areas:*/
+                    /*    "hero"*/
+                    /*    "aside1"*/
+                    /*    "aside2";*/
+                    /*}*/
+                    /*.bento_grid.center.bento-col-2 .entries {*/
+                    /*    grid-template-columns: repeat(2, 1fr) !important;*/
+                    /*    grid-template-areas:*/
+                    /*        "hero hero"*/
+                    /*        "aside1 aside2";*/
+                    /*}*/
+                    /*.bento_grid.right.bento-col-2 .entries {*/
+                    /*    grid-template-columns: repeat(2, 1fr) !important;*/
+                    /*    grid-template-areas:*/
+                    /*        "hero hero"*/
+                    /*        "aside1 aside2";*/
+                    /*}*/
+
+
+                }
+
+                /*@media screen and (max-width: 1600px) {*/
+                /*    .bento_grid.center.bento-col-2 .entries {*/
+                /*        grid-template-columns: repeat(2, 1fr) !important;*/
+                /*        grid-template-areas:*/
+                /*            "hero hero"*/
+                /*            "aside1 aside2";*/
+                /*    }*/
+                /*}*/
 
                 .bento_grid .entries .entry-card:nth-child(1) {
                     grid-area: hero;
@@ -460,14 +544,32 @@ class Elementor_Blocksy_Posts_Widget extends Widget_Base
     }
 
     // Render the widget output in the editor.
-    protected function _content_template()
+    protected function content_template()
     {
         ?>
-        <# if ( settings.shortcode ) { #>
-        {{{ settings.shortcode }}}
-        <# } else { #>
-        <span><?php _e('Please enter a valid shortcode.', 'beyondweb'); ?></span>
-        <# } #>
+        <#
+        var post_ids = '';
+        var limit = settings.posts_per_page;
+        var post_type = settings.post_type;
+
+        var class_name = '';
+        if (settings.bento_grid === 'yes') {
+        class_name = 'bento_grid';
+        var bento_cols = Math.floor((settings.posts_per_page - 1) / 2 + 1);
+        bento_cols = Math.min(Math.max(bento_cols, 2), 3);
+        class_name += ' bento-col-' + bento_cols;
+        }
+
+        if (settings.bento_grid_layout) {
+        class_name += ' ' + settings.bento_grid_layout;
+        }
+
+        var shortcode = '[blocksy_posts post_ids="' + post_ids +
+        '" limit="' + limit +
+        '" post_type="' + post_type +
+        '" has_pagination="no" filtering="yes" class="' + class_name + '"]';
+        #>
+        {{{ shortcode }}}
         <?php
     }
 
